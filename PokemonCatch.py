@@ -15,9 +15,7 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="$", intents=intents)
 
-# ----------------------------
-# Persistent storage functions
-# ----------------------------
+# we use a json file to keep track of whoever wants to be tracked down by this bot;
 TRACKED_FILE = "tracked_users.json"
 TIMERS_FILE = "active_timers.json"
 
@@ -107,7 +105,7 @@ async def add_tracked_user(ctx):
 
     tracked_users.add(ctx.author.id)
     save_tracked_users()
-    await ctx.send(f"{ctx.author.mention}, you are now being tracked for Pokémon cooldowns!")
+    await ctx.send(f"{ctx.author.mention}, I'm onto you now;)")
 
 @bot.event
 async def on_message(message):
@@ -126,7 +124,8 @@ async def on_message(message):
                 minutes = int((remaining.total_seconds() % 3600) // 60)
                 seconds = int(remaining.total_seconds() % 60)
                 await message.channel.send(
-                    f"{message.author.mention}, you still have {hours} hours, {minutes} minutes and {seconds} seconds remaining!"
+                    #f"{message.author.mention}, you still have {hours} hours, {minutes} minutes and {seconds} seconds remaining!"
+                    f"Go play league of legends or fortnite and I will notify you when you can catch a pokemon;) "
                 )
                 return
             else:
@@ -135,7 +134,7 @@ async def on_message(message):
 
         total_seconds = await wait_for_toasty_numbers(message.channel)
         if not total_seconds:
-            await message.channel.send(f"{message.author.mention}, couldn't detect Toasty's cooldown numbers.")
+            await message.channel.send(f"{message.author.mention}, shit, Toasty is either down or I'm bugging, call Jason now")
             return
 
         hours = total_seconds // 3600
@@ -154,7 +153,7 @@ async def on_message(message):
             try:
                 await asyncio.sleep(total_seconds)
                 await channel.send(
-                    f"{user.mention}, your cooldown is over! You can catch another Pokémon now!"
+                    f"{user.mention}, your cooldown is over! Catch them all!"
                 )
             finally:
                 active_timers.pop(user.id, None)

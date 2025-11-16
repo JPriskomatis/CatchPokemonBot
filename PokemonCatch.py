@@ -112,39 +112,69 @@ async def on_message(message):
     if message.author.id == bot.user.id:
         return
 
+    # Only respond to ;pokemon IF user is tracked
     if message.content.strip().lower() == ";pokemon" and message.author.id in tracked_users:
         user_id = message.author.id
+        now = datetime.now(timezone.utc)
 
-        now = datetime.now(timezone.utc)  # was just datetime.now()
+        # Check existing timer
         if user_id in active_timers:
             end_time = active_timers[user_id]
             remaining = end_time - now
             if remaining.total_seconds() > 0:
-                hours = int(remaining.total_seconds() // 3600)
-                minutes = int((remaining.total_seconds() % 3600) // 60)
-                seconds = int(remaining.total_seconds() % 60)
                 await message.channel.send(
-                    #f"{message.author.mention}, you still have {hours} hours, {minutes} minutes and {seconds} seconds remaining!"
-                    f"Go play league of legends or fortnite and I will notify you when you can catch a pokemon;) "
+                    "Go play league of legends or fortnite and I will notify you when you can catch a pokemon;)"
                 )
                 return
             else:
                 active_timers.pop(user_id, None)
                 save_active_timers()
 
-        total_seconds = await wait_for_toasty_numbers(message.channel)
-        if not total_seconds:
-            await message.channel.send(f"{message.author.mention}, shit, Toasty is either down or I'm bugging, call Jason now")
+        # ---- WAIT FOR TOASTY RESPONSE ----
+        def toast_check(msg):
+            return msg.channel == message.channel and msg.author.bot
+
+        try:
+            toast_msg = await bot.wait_for("message", check=toast_check, timeout=15.0)
+        except asyncio.TimeoutError:
+            await message.channel.send(f"{message.author.mention}, Toasty didn't respond... call Jason.")
             return
 
-        hours = total_seconds // 3600
-        minutes = (total_seconds % 3600) // 60
-        seconds = total_seconds % 60
+        # ---- SUCCESSFUL CATCH DETECTION ----
+        success_patterns = [
+            r"caught",
+            r"you caught",
+            r"successfully",
+            r"caught a",
+            r"you have caught",
+        ]
 
-        await message.channel.send(
-            f"{message.author.mention}, I will remind you in {hours} hours, {minutes} minutes and {seconds} seconds!"
-        )
+        if any(re.search(pat, toast_msg.content, re.IGNORECASE) for pat in success_patterns):
+            # User CAUGHT a Pokémon
+            total_seconds = 3 * 3600  # 3 hours fixed
+            hours, minutes, seconds = 3, 0, 0
 
+            await message.channel.send(
+                f"{message.author.mention}, you caught a Pokémon! I'll remind you in 3 hours!"
+            )
+        else:
+            # Not a catch → Extract cooldown normally
+            total_seconds = await wait_for_toasty_numbers(message.channel)
+            if not total_seconds:
+                await message.channel.send(
+                    f"{message.author.mention}, Toasty gave me something weird... call Jason."
+                )
+                return
+
+            hours = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            seconds = total_seconds % 60
+
+            await message.channel.send(
+                f"{message.author.mention}, I will remind you in {hours} hours, {minutes} minutes and {seconds} seconds!"
+            )
+
+        # ---- START TIMER ----
         end_time = datetime.now(timezone.utc) + timedelta(seconds=total_seconds)
         active_timers[user_id] = end_time
         save_active_timers()

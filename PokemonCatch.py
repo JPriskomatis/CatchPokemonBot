@@ -151,11 +151,10 @@ async def on_message(message):
 
         if any(re.search(pat, toast_msg.content, re.IGNORECASE) for pat in success_patterns):
             # User CAUGHT a Pokémon
-            total_seconds = 3 * 3600  # 3 hours fixed
-            hours, minutes, seconds = 3, 0, 0
+            total_seconds = 3 * 3600  # fixed 3 hour timer
 
             await message.channel.send(
-                f"{message.author.mention}, you caught a Pokémon! I'll remind you in 3 hours!"
+                f"{message.author.mention}, you caught a Pokémon! Timer started — I will mention you in 3 hours!"
             )
         else:
             # Not a catch → Extract cooldown normally

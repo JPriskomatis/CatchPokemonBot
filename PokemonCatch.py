@@ -130,15 +130,33 @@ async def on_message(message):
                 active_timers.pop(user_id, None)
                 save_active_timers()
 
-        # ---- WAIT FOR TOASTY RESPONSE ----
+        # ---- WAIT FOR ALL TOASTY MESSAGES (supports multi-message responses) ----
+        toasty_messages = []
+
         def toast_check(msg):
             return msg.channel == message.channel and msg.author.bot
 
+        # Collect Toasty messages for up to 2 seconds after the first message
         try:
-            toast_msg = await bot.wait_for("message", check=toast_check, timeout=15.0)
+            first_msg = await bot.wait_for("message", check=toast_check, timeout=15.0)
+            toasty_messages.append(first_msg)
+
+            # Gather additional bot messages for up to 2 seconds
+            start = datetime.now()
+            while (datetime.now() - start).total_seconds() < 2:
+                try:
+                    m = await bot.wait_for("message", check=toast_check, timeout=0.5)
+                    toasty_messages.append(m)
+                except asyncio.TimeoutError:
+                    break
+
         except asyncio.TimeoutError:
             await message.channel.send(f"{message.author.mention}, Toasty didn't respond... call Jason.")
             return
+
+        # Combine message contents (sometimes catch is not in the first embed)
+        combined = "\n".join(m.content for m in toasty_messages)
+
 
         # ---- SUCCESSFUL CATCH DETECTION ----
         success_patterns = [
@@ -149,7 +167,7 @@ async def on_message(message):
             r"you have caught",
         ]
 
-        if any(re.search(pat, toast_msg.content, re.IGNORECASE) for pat in success_patterns):
+        if any(re.search(pat, combined, re.IGNORECASE) for pat in success_patterns):
             # User CAUGHT a Pokémon
             total_seconds = 3 * 3600  # fixed 3 hour timer
 

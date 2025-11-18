@@ -407,7 +407,7 @@ async def on_message(message: discord.Message):
             minutes = (rem_td.seconds % 3600) // 60
             seconds = rem_td.seconds % 60
             await message.channel.send(
-                f"{message.author.mention}, you still have a cooldown — {hours}h {minutes}m {seconds}s remaining. Go play something else, I'll ping you later!"
+                f"Bro you still have a timer: {hours}h {minutes}m {seconds}s remaining. I'll let you know when your time's up nibba"
             )
             logger.debug(f"User {uid} still on cooldown ({int(remaining)}s left)")
             return
@@ -434,7 +434,7 @@ async def on_message(message: discord.Message):
     seconds = total_seconds % 60
     if total_seconds == 3 * 3600:
         # success-catch case
-        await message.channel.send(f"{message.author.mention}, you caught a Pokémon! Timer started — I will mention you in 3 hours!")
+        await message.channel.send(f"Noice, I'll let you know when your timer is up.")
         logger.info(f"User {uid} caught a Pokémon (3h timer)")
     else:
         await message.channel.send(

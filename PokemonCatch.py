@@ -1,6 +1,7 @@
 # toasty_reminder_bot.py
 import os
 import re
+
 import asyncio
 import discord
 from discord.ext import commands
@@ -30,6 +31,10 @@ intents.message_content = True
 intents.messages = True
 
 bot = commands.Bot(command_prefix="$", intents=intents)
+
+# pokemon words to catch;
+pokemonWords = [";pokemon", "; pokemon"]
+new_PokemonWords = []
 
 # -------------------------
 # Logging (file + console)
@@ -316,6 +321,11 @@ def schedule_timer_for_user(user: discord.User, channel: discord.abc.Messageable
 # -------------------------
 @bot.event
 async def on_ready():
+    print("test")
+    for word in pokemonWords:
+        if isinstance(word, str):
+            new_PokemonWords.append(word.lower())
+            print(new_PokemonWords)
     logger.info(f"{bot.user} is online! Preparing pending timers...")
     # Recreate tasks for timers loaded from disk
     for user_id, end_ts in list(active_timers_map.items()):
@@ -386,7 +396,7 @@ async def on_message(message: discord.Message):
         return
 
     # Only respond to ;pokemon if the user is tracked
-    if message.content.strip().lower() != ";pokemon":
+    if message.content.strip().lower() not in new_PokemonWords:
         return
 
     uid = message.author.id

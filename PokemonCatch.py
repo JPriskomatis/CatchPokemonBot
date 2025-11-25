@@ -225,10 +225,10 @@ def parse_duration_from_text(text: str) -> Optional[int]:
 # -------------------------
 # Wait for Toasty numbers (reads multiple messages + embeds)
 # -------------------------
-async def wait_for_toasty_numbers(channel: discord.abc.Messageable, timeout: float = 15.0) -> Optional[int]:
+async def wait_for_toasty_numbers(channel: discord.abc.Messageable, timeout: float = 15.0) -> Optional[tuple[int, discord.Message]]:
     """
     Wait for next bot message(s) from Toasty in this channel containing valid cooldown numbers.
-    Returns total_seconds or None on timeout/failure.
+    Returns (total_seconds, toasty_message) or (None, None) on timeout/failure.
     """
     def check(msg: discord.Message):
         return msg.channel == channel and getattr(msg.author, "id", None) == TOASTY_ID
@@ -239,7 +239,7 @@ async def wait_for_toasty_numbers(channel: discord.abc.Messageable, timeout: flo
         first_msg = await bot.wait_for("message", check=check, timeout=timeout)
     except asyncio.TimeoutError:
         logger.debug("Timeout waiting for first Toasty message")
-        return None
+        return None, None
 
     messages = [first_msg]
     # Give a short window (2.5s) to collect subsequent bot messages (embeds etc.)
@@ -250,6 +250,9 @@ async def wait_for_toasty_numbers(channel: discord.abc.Messageable, timeout: flo
             messages.append(m)
         except asyncio.TimeoutError:
             break
+
+    # We'll react to the last message we collected (most likely to contain the visible result)
+    toasty_msg = messages[-1]
 
     combined = "\n".join(extract_message_text(m) for m in messages if m)
     logger.debug(f"Combined Toasty text collected: {combined!r}")
@@ -265,16 +268,17 @@ async def wait_for_toasty_numbers(channel: discord.abc.Messageable, timeout: flo
     ]
     if any(re.search(pat, combined, re.IGNORECASE) for pat in success_patterns):
         logger.debug("Detected a 'caught' success message from Toasty")
-        return 3 * 3600  # fixed 3-hour cooldown for catches
+        return 3 * 3600, toasty_msg  # fixed 3-hour cooldown for catches
 
     # Otherwise, try parse duration
     total = parse_duration_from_text(combined)
     if total:
         logger.debug(f"Parsed duration from Toasty: {total} seconds")
-        return total
+        return total, toasty_msg
 
     logger.debug("Failed to parse duration or success from Toasty messages")
-    return None
+    return None, None
+
 
 # -------------------------
 # Timer task management
@@ -431,9 +435,9 @@ async def on_message(message: discord.Message):
             logger.debug(f"Cleared expired timer for {uid}")
 
     # Wait for Toasty messages (content + embeds)
-    total_seconds = await wait_for_toasty_numbers(message.channel, timeout=20.0)
-    if total_seconds is None:
-        # Could not parse or Toasty didn't respond
+    total_seconds, toasty_msg = await wait_for_toasty_numbers(message.channel, timeout=20.0)
+
+    if total_seconds is None or toasty_msg is None:
         await message.channel.send(f"{message.author.mention}, Toasty didn't give me a usable response. Try again or call Jason.")
         logger.warning(f"Failed to get a usable response from Toasty for user {uid}")
         return
@@ -442,15 +446,24 @@ async def on_message(message: discord.Message):
     hours = total_seconds // 3600
     minutes = (total_seconds % 3600) // 60
     seconds = total_seconds % 60
+
     if total_seconds == 3 * 3600:
-        # success-catch case
-        await message.channel.send(f"Noice, I'll let you know when your timer is up.")
+        # React to Toasty's message for a caught Pokémon
+        try:
+            await toasty_msg.add_reaction("🔥")  # pick an emoji you like
+        except Exception:
+            logger.exception("Failed to add reaction to Toasty message (caught case)")
+        # Optional: also notify the user in channel (you can keep or remove this)
+        await message.channel.send("Noice, I'll let you know when your timer is up.")
         logger.info(f"User {uid} caught a Pokémon (3h timer)")
     else:
-        await message.channel.send(
-            f"{message.author.mention}, I will remind you in {hours} hours, {minutes} minutes and {seconds} seconds!"
-        )
+        # React to Toasty's message for a cooldown
+        try:
+            await toasty_msg.add_reaction("⏳")
+        except Exception:
+            logger.exception("Failed to add reaction to Toasty message (cooldown case)")
         logger.info(f"User {uid} has cooldown {total_seconds} seconds ({hours}h {minutes}m {seconds}s)")
+
 
     # schedule task
     schedule_timer_for_user(message.author, message.channel, int(total_seconds))

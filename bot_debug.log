@@ -59,3 +59,37 @@
 2025-11-20 19:03:43,802 DEBUG: User 266688199307296778 still on cooldown (1704s left)
 2025-11-20 19:03:47,359 DEBUG: Saved active timers: {}
 2025-11-20 19:03:47,359 DEBUG: Timer cleaned up for user 266688199307296778
+2025-11-25 16:38:01,497 INFO: Logger initialized
+2025-11-25 16:38:01,503 DEBUG: Loaded tracked users: [266688199307296778]
+2025-11-25 16:38:01,504 INFO: Startup: loaded 1 tracked users and 0 pending timers
+2025-11-25 16:38:01,505 INFO: Starting bot...
+2025-11-25 16:38:04,649 INFO: CatchPokemon#2178 is online! Preparing pending timers...
+2025-11-25 16:38:04,649 DEBUG: Saved active timers: {}
+2025-11-25 16:38:06,571 INFO: Received ;pokemon from tracked user 266688199307296778 in channel 773962168273731647
+2025-11-25 16:38:06,572 DEBUG: Waiting for Toasty messages in channel 773962168273731647 (timeout=20.0)
+2025-11-25 16:38:07,463 DEBUG: Extracted text from msg 1442887081859878983 (author=208946659361554432): '<:xmark:314349398824058880> you need to wait another **1 hour, 13 minutes & 8 seconds** before catching another pokemon.'
+2025-11-25 16:38:07,463 DEBUG: Combined Toasty text collected: '<:xmark:314349398824058880> you need to wait another **1 hour, 13 minutes & 8 seconds** before catching another pokemon.'
+2025-11-25 16:38:07,464 DEBUG: Parsing duration from text: '<:xmark:314349398824058880> you need to wait another **1 hour, 13 minutes & 8 seconds** before catching another pokemon.'
+2025-11-25 16:38:07,464 DEBUG: Parsed tokens -> 4388 seconds from [('1', 'hour'), ('13', 'minutes'), ('8', 'seconds')]
+2025-11-25 16:38:07,464 DEBUG: Parsed duration from Toasty: 4388 seconds
+2025-11-25 16:38:08,299 INFO: User 266688199307296778 has cooldown 4388 seconds (1h 13m 8s)
+2025-11-25 16:38:08,300 DEBUG: Saved active timers: {266688199307296778: 1764085876.299794}
+2025-11-25 16:38:08,300 DEBUG: Scheduled timer task for 266688199307296778, ends at 2025-11-25T15:51:16.299794+00:00
+2025-11-25 16:38:08,300 INFO: Timer started for user 266688199307296778: 4388 seconds
+2025-11-25 16:38:35,220 INFO: Received ;pokemon from tracked user 266688199307296778 in channel 773962168273731647
+2025-11-25 16:38:35,512 DEBUG: User 266688199307296778 still on cooldown (4361s left)
+2025-11-25 16:39:07,802 INFO: Logger initialized
+2025-11-25 16:39:07,803 DEBUG: Loaded tracked users: [266688199307296778]
+2025-11-25 16:39:07,815 DEBUG: Loaded active timer for 266688199307296778 -> 2025-11-25T15:51:16.299794+00:00
+2025-11-25 16:39:07,815 INFO: Startup: loaded 1 tracked users and 1 pending timers
+2025-11-25 16:39:07,815 INFO: Starting bot...
+2025-11-25 16:39:10,876 INFO: CatchPokemon#2178 is online! Preparing pending timers...
+2025-11-25 16:39:11,341 DEBUG: Saved active timers: {266688199307296778: 1764085876.340496}
+2025-11-25 16:39:11,341 DEBUG: Scheduled timer task for 266688199307296778, ends at 2025-11-25T15:51:16.340496+00:00
+2025-11-25 16:39:11,341 INFO: Rescheduled timer for user 266688199307296778 (remaining 4325s) via DM
+2025-11-25 16:39:11,341 DEBUG: Saved active timers: {266688199307296778: 1764085876.340496}
+2025-11-25 16:39:11,341 INFO: Timer started for user 266688199307296778: 4325 seconds
+2025-11-25 16:39:12,547 INFO: Received ;pokemon from tracked user 266688199307296778 in channel 773962168273731647
+2025-11-25 16:39:12,851 DEBUG: User 266688199307296778 still on cooldown (4323s left)
+2025-11-25 16:48:40,827 DEBUG: Saved active timers: {}
+2025-11-25 16:48:40,827 DEBUG: Timer cleaned up for user 266688199307296778

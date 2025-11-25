@@ -453,8 +453,6 @@ async def on_message(message: discord.Message):
             await toasty_msg.add_reaction("🔥")  # pick an emoji you like
         except Exception:
             logger.exception("Failed to add reaction to Toasty message (caught case)")
-        # Optional: also notify the user in channel (you can keep or remove this)
-        await message.channel.send("Noice, I'll let you know when your timer is up.")
         logger.info(f"User {uid} caught a Pokémon (3h timer)")
     else:
         # React to Toasty's message for a cooldown
